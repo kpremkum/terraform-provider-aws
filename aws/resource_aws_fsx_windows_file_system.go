@@ -56,6 +56,18 @@ func resourceAwsFsxWindowsFileSystem() *schema.Resource {
 				Default:  false,
 				ForceNew: true,
 			},
+			"deployment_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  false,
+				ForceNew: true,
+			},
+			"preferred_subnet_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  false,
+				ForceNew: true,
+			},
 			"daily_automatic_backup_start_time": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -151,7 +163,7 @@ func resourceAwsFsxWindowsFileSystem() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 				MinItems: 1,
-				MaxItems: 1,
+				MaxItems: 2,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"tags": tagsSchema(),
@@ -189,6 +201,8 @@ func resourceAwsFsxWindowsFileSystemCreate(d *schema.ResourceData, meta interfac
 		WindowsConfiguration: &fsx.CreateFileSystemWindowsConfiguration{
 			AutomaticBackupRetentionDays: aws.Int64(int64(d.Get("automatic_backup_retention_days").(int))),
 			CopyTagsToBackups:            aws.Bool(d.Get("copy_tags_to_backups").(bool)),
+			DeploymentType:               aws.String(d.Get("deployment_type").(string)),
+			PreferredSubnetId:            aws.String(d.Get("preferred_subnet_id").(string)),
 			ThroughputCapacity:           aws.Int64(int64(d.Get("throughput_capacity").(int))),
 		},
 	}
@@ -318,6 +332,8 @@ func resourceAwsFsxWindowsFileSystemRead(d *schema.ResourceData, meta interface{
 	d.Set("arn", filesystem.ResourceARN)
 	d.Set("automatic_backup_retention_days", filesystem.WindowsConfiguration.AutomaticBackupRetentionDays)
 	d.Set("copy_tags_to_backups", filesystem.WindowsConfiguration.CopyTagsToBackups)
+	d.Set("deployment_type", filesystem.WindowsConfiguration.DeploymentType)
+	d.Set("preferred_subnet_id", filesystem.WindowsConfiguration.PreferredSubnetId)
 	d.Set("daily_automatic_backup_start_time", filesystem.WindowsConfiguration.DailyAutomaticBackupStartTime)
 	d.Set("dns_name", filesystem.DNSName)
 	d.Set("kms_key_id", filesystem.KmsKeyId)
